@@ -32,4 +32,14 @@ function init() {
 
   // シーンに追加
   scene.add(box);
+
+  // ライト設定
+  const light = new THREE.DirectionalLight(0xffffff); // DirectionalLight：平行光源
+  light.intensity = 2; // 光の強さを倍に
+  light.position.set(1, 1, 1); // ライトの方向
+  // シーンに追加
+  scene.add(light);
+
+  // 描画
+  renderer.render(scene, camera);
 }
