@@ -1,60 +1,55 @@
 import * as THREE from "three";
 import { OrbitControls } from "three-orbitcontrols-ts";
+import GUI from "lil-gui";
 
 let scene: THREE.Scene,
   camera: THREE.PerspectiveCamera,
-  pointLight: THREE.PointLight,
-  renderer: THREE.WebGLRenderer;
+  renderer: THREE.WebGLRenderer,
+  controls: OrbitControls,
+  clock: THREE.Clock;
 
 window.addEventListener("load", init);
 
+//サイズ
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
 function init() {
+  // UIデバッグ
+  const gui = new GUI();
+
   // シーンの追加
   scene = new THREE.Scene();
 
   // カメラの追加（視野角、アスペクト比、開始距離、終了距離）
   camera = new THREE.PerspectiveCamera(
-    50,
-    window.innerWidth / window.innerHeight,
+    75,
+    sizes.width / sizes.height,
     0.1,
-    1000
+    100
   );
-  camera.position.set(0, 0, 500);
+  camera.position.set(1, 1, 2);
 
   // レンダラーの追加
-  renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
 
-  // テクスチャの追加
-  const earthTexture = new THREE.TextureLoader().load(
-    "../src/textures/earth.jpg"
-  );
+  /**
+ * テクスチャ設定
+ * /
 
-  // ジオメトリを作成
-  const ballGeometry = new THREE.SphereGeometry(100, 64, 32);
-  // マテリアルを作成
-  const ballMaterial = new THREE.MeshPhysicalMaterial({ map: earthTexture });
-  // メッシュ化
-  const ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
-  scene.add(ballMesh);
 
-  // 平行光源
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 8); // 色、つよさ
-  directionalLight.position.set(1, 1, 1);
-  scene.add(directionalLight);
-
-  // ポイント光源
-  pointLight = new THREE.PointLight(0xffffff, 100000);
-  pointLight.position.set(-200, -200, -200);
-  scene.add(pointLight);
-  // ポイント光源がどこにあるのか
-  // const pointLightHelper = new THREE.PointLightHelper(pointLight, 30);
-  // scene.add(pointLightHelper);
+/**
+ * パーティクル作成
+ */
 
   // マウス操作
-  const controls = new OrbitControls(camera, renderer.domElement);
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
 
   window.addEventListener("resize", onWindowResize);
 
@@ -72,14 +67,11 @@ function onWindowResize() {
 }
 
 function animate() {
-  requestAnimationFrame(animate);
+  const elapsedTime = clock.getElapsedTime();
 
-  // ポイント光源の巡回
-  pointLight.position.set(
-    200 * Math.sin(Date.now() / 500),
-    200 * Math.sin(Date.now() / 1000),
-    200 * Math.cos(Date.now() / 500)
-  );
+  controls.update();
 
+  //レンダリング
   renderer.render(scene, camera);
+  requestAnimationFrame(animate);
 }
